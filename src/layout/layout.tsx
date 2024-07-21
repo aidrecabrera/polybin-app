@@ -1,9 +1,7 @@
 import {
-  AlertCircleIcon,
   BrainCog,
   Combine,
   Home,
-  Logs,
   Menu,
   Package2,
   Trash2
@@ -16,11 +14,9 @@ import { Link } from "@tanstack/react-router";
 
 const navLinks = [
   { href: "/", icon: Home, label: "Dashboard" },
-  { href: "/bin", icon: Trash2, label: "Bin" },
-  { href: "/dispose", icon: Combine, label: "Dispose" },
-  { href: "/alerts", icon: AlertCircleIcon, label: "Alerts" },
+  { href: "/bin", icon: Trash2, label: "Bin Status" },
+  { href: "/dispose", icon: Combine, label: "Dispose Logs" },
   { href: "/prediction", icon: BrainCog, label: "Prediction" },
-  { href: "/logs", icon: Logs, label: "Logs" },
 ];
 
 const renderNavLink = (link: any) => (
@@ -102,7 +98,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </SheetContent>
           </Sheet>
         </header>
-        <main className="flex flex-col flex-1 gap-4 px-4 lg:gap-6 lg:p-6">
+        <main className="flex flex-col flex-1 gap-4 px-6 lg:gap-6 lg:p-8">
           {children}
         </main>
       </div>

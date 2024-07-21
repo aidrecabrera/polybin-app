@@ -13,23 +13,35 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as LogIndexImport } from './routes/log/index'
 
 // Create Virtual Routes
 
+const PredictionLazyImport = createFileRoute('/prediction')()
+const DisposeLazyImport = createFileRoute('/dispose')()
+const BinLazyImport = createFileRoute('/bin')()
 const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
+
+const PredictionLazyRoute = PredictionLazyImport.update({
+  path: '/prediction',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/prediction.lazy').then((d) => d.Route))
+
+const DisposeLazyRoute = DisposeLazyImport.update({
+  path: '/dispose',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/dispose.lazy').then((d) => d.Route))
+
+const BinLazyRoute = BinLazyImport.update({
+  path: '/bin',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/bin.lazy').then((d) => d.Route))
 
 const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
-
-const LogIndexRoute = LogIndexImport.update({
-  path: '/log/',
-  getParentRoute: () => rootRoute,
-} as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -42,11 +54,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
-    '/log/': {
-      id: '/log/'
-      path: '/log'
-      fullPath: '/log'
-      preLoaderRoute: typeof LogIndexImport
+    '/bin': {
+      id: '/bin'
+      path: '/bin'
+      fullPath: '/bin'
+      preLoaderRoute: typeof BinLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/dispose': {
+      id: '/dispose'
+      path: '/dispose'
+      fullPath: '/dispose'
+      preLoaderRoute: typeof DisposeLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/prediction': {
+      id: '/prediction'
+      path: '/prediction'
+      fullPath: '/prediction'
+      preLoaderRoute: typeof PredictionLazyImport
       parentRoute: typeof rootRoute
     }
   }
@@ -56,7 +82,9 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexLazyRoute,
-  LogIndexRoute,
+  BinLazyRoute,
+  DisposeLazyRoute,
+  PredictionLazyRoute,
 })
 
 /* prettier-ignore-end */
@@ -68,14 +96,22 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/log/"
+        "/bin",
+        "/dispose",
+        "/prediction"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
     },
-    "/log/": {
-      "filePath": "log/index.tsx"
+    "/bin": {
+      "filePath": "bin.lazy.tsx"
+    },
+    "/dispose": {
+      "filePath": "dispose.lazy.tsx"
+    },
+    "/prediction": {
+      "filePath": "prediction.lazy.tsx"
     }
   }
 }

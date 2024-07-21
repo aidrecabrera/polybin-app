@@ -2,7 +2,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -15,6 +14,7 @@ import {
 import {
   Bar,
   BarChart,
+  CartesianGrid,
   Label,
   Rectangle,
   ReferenceLine,
@@ -36,26 +36,42 @@ export default function WeekDisposalChart({
   chartData: any[];
 }) {
   return (
-    <Card className="w-full h-auto">
-      <CardHeader className="pb-2 space-y-0">
+    <Card>
+      <CardHeader className="pb-2 space-y-2">
         <CardDescription>Total Disposal</CardDescription>
-        <CardTitle className="text-4xl tabular-nums">
+        <CardTitle className="text-6xl tabular-nums">
           {data.length}{" "}
           <span className="font-sans text-sm font-normal tracking-normal text-muted-foreground">
             Disposals
           </span>
         </CardTitle>
+        <CardDescription>
+          <div>
+            Over the past 7 days,{" "}
+            <span className="font-medium text-foreground">
+              {data.reduce((acc, log) => acc + (log.bin_type ? 1 : 0), 0)}
+            </span>{" "}
+            waste disposals were recorded. The average disposal rate is{" "}
+            <span className="font-medium text-foreground">
+              {Math.round(
+                data.reduce((acc, log) => acc + (log.bin_type ? 1 : 0), 0) / 7
+              )}
+            </span>{" "}
+          </div>
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart
             accessibilityLayer
             margin={{
+              top: 0,
               left: -4,
               right: -4,
             }}
             data={chartData}
           >
+            <CartesianGrid vertical={true} />
             <Bar
               dataKey="Non-Biodegradable"
               fill="hsl(var(--chart-2))"
@@ -157,15 +173,6 @@ export default function WeekDisposalChart({
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-1 ">
-        <div>
-          Over the past 7 days,{" "}
-          <span className="font-medium text-foreground">
-            {data.reduce((acc, log) => acc + (log.bin_type ? 1 : 0), 0)}
-          </span>{" "}
-          waste disposals were recorded.
-        </div>
-      </CardFooter>
     </Card>
   );
 }

@@ -5,16 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ChartContainer } from "@/components/ui/chart";
-import { getWeekPredictionLog } from "@/services/predictionLog";
 import {
-  Bar,
-  BarChart,
-  Label,
-  Rectangle,
-  ReferenceLine,
-  XAxis,
-} from "recharts";
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { getWeekPredictionLog } from "@/services/predictionLog";
+import { Area, AreaChart, Label, ReferenceLine } from "recharts";
 
 export default function PredictionChart() {
   const { data: prediction_log, isLoading, error } = getWeekPredictionLog();
@@ -46,7 +43,7 @@ export default function PredictionChart() {
       <CardHeader className="p-4 pb-0">
         <CardTitle>Average Confidence</CardTitle>
         <CardDescription>
-          Over the last 7 days, the average confidence of detections was{" "}
+          Over the last 100 prediction, the average confidence of detections was{" "}
           {averageConfidence.toFixed(2)}.
         </CardDescription>
       </CardHeader>
@@ -62,35 +59,40 @@ export default function PredictionChart() {
             config={{
               confidence: {
                 label: "Confidence",
-                color: "hsl(var(--chart-1))",
+                color: "hsl(var(--chart-2))",
               },
             }}
             className="w-full ml-auto h-[107px]"
           >
-            <BarChart
-              accessibilityLayer
+            <AreaChart
+              width={500}
+              height={200}
+              data={chartData}
               margin={{
+                top: 15,
+                right: 30,
                 left: 0,
-                right: 0,
-                top: 20,
                 bottom: 0,
               }}
-              data={chartData}
             >
-              <Bar
-                dataKey="confidence"
-                fill="var(--color-confidence)"
-                radius={2}
-                fillOpacity={0.2}
-                activeIndex={chartData.length - 1}
-                activeBar={<Rectangle fillOpacity={0.8} />}
+              <ChartTooltip
+                cursor={true}
+                content={<ChartTooltipContent hideLabel />}
+                formatter={(value: number) => (
+                  <div className="flex min-w-[120px] items-center text-xs text-muted-foreground gap-2">
+                    Confidence
+                    <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                      {value.toFixed(2)}
+                    </div>
+                  </div>
+                )}
               />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={4}
-                hide
+              <Area
+                type="monotone"
+                dataKey="confidence"
+                stroke="var(--color-confidence)"
+                fill="var(--color-confidence)"
+                fillOpacity={0.2}
               />
               <ReferenceLine
                 y={averageConfidence}
@@ -99,21 +101,17 @@ export default function PredictionChart() {
                 strokeWidth={1}
               >
                 <Label
-                  position="insideBottomLeft"
-                  value="Average Confidence"
-                  offset={10}
-                  fill="hsl(var(--foreground))"
-                />
-                <Label
-                  position="insideTopLeft"
-                  value={averageConfidence.toFixed(2)}
-                  className="text-lg"
-                  fill="hsl(var(--foreground))"
-                  offset={10}
-                  startOffset={100}
-                />
+                position="insideTopRight"
+                value={
+                  "Avg. Confidence"
+                }
+                fill="hsl(var(--foreground))"
+                offset={15}
+                fontSize={14}
+                fontWeight={400}
+              />
               </ReferenceLine>
-            </BarChart>
+            </AreaChart>
           </ChartContainer>
         </div>
       </CardContent>

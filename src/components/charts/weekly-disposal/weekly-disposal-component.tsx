@@ -1,5 +1,5 @@
 import { getPastWeekDates } from "@/lib/utils";
-import { getWeekDisposeLog } from "@/services/alertLog";
+import { getWeekDisposeLog } from "@/services/disposeLog";
 import WeeklyDisposalChart from "./weekly-disposal-chart";
 
 interface DisposeLog {
