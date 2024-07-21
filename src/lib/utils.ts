@@ -15,3 +15,29 @@ export const convertSensorData = (value: number): number => {
   return percentage;
 };
 
+export function mapDailySensorData(data: any[], sensorKey: string) {
+  return data.map(item => ({
+    created_at: item.created_at,
+    SENSOR_DATA: Math.floor((40 - item[sensorKey]) * (100 / 30)),
+  }));
+}
+
+export const getPastWeekDates = () => {
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const pastSunday = new Date(today);
+  pastSunday.setDate(today.getDate() - dayOfWeek);
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(pastSunday);
+    date.setDate(pastSunday.getDate() + i);
+    dates.push(
+      date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+    );
+  }
+  return dates;
+};

@@ -21,11 +21,11 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <QueryClientProvider client={queryClient}>
-        <StrictMode>
-          <RouterProvider router={router} />
-        </StrictMode>
-      </QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <StrictMode>
+            <RouterProvider router={router} />
+          </StrictMode>
+        </QueryClientProvider>
     </ThemeProvider>
   );
 }

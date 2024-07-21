@@ -30,3 +30,42 @@ export function getWeeklyBinLevel() {
     },
   });
 }
+
+export function getTodayBinLevel() {
+  return useQuery({
+    queryKey: ["todayBinLevel"],
+    queryFn: async () => {
+      const today = new Date();
+      const startOfDay = new Date(today.setUTCHours(0, 0, 0, 0)).toISOString();
+      const endOfDay = new Date(today.setUTCHours(23, 59, 59, 999)).toISOString();
+
+      const { data, error } = await supabase
+        .from("bin_levels")
+        .select("created_at, SENSOR_1, SENSOR_2, SENSOR_3, SENSOR_4")
+        .gte("created_at", startOfDay)
+        .lte("created_at", endOfDay)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function getLatestBinLevel() {
+  return useQuery({
+    queryKey: ['latestBinLevel'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('bin_levels')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    },
+  });
+}

@@ -1,93 +1,130 @@
-import { TrendingUp } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
-
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
 import {
-    ChartConfig,
-    ChartContainer,
-    ChartTooltip,
-    ChartTooltipContent,
-} from "@/components/ui/chart"
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent
+} from "@/components/ui/chart";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { dailyChartConfig } from "../config";
 
-const chartData = [
-  { date: "2024-01-01", SENSOR_1: 22, SENSOR_2: 30, SENSOR_3: 25, SENSOR_4: 20 },
-  { date: "2024-01-02", SENSOR_1: 25, SENSOR_2: 28, SENSOR_3: 27, SENSOR_4: 19 },
-  { date: "2024-01-03", SENSOR_1: 21, SENSOR_2: 26, SENSOR_3: 23, SENSOR_4: 18 },
-  { date: "2024-01-04", SENSOR_1: 24, SENSOR_2: 32, SENSOR_3: 28, SENSOR_4: 22 },
-  { date: "2024-01-05", SENSOR_1: 27, SENSOR_2: 29, SENSOR_3: 24, SENSOR_4: 20 },
-  { date: "2024-01-06", SENSOR_1: 23, SENSOR_2: 31, SENSOR_3: 26, SENSOR_4: 21 },
-  { date: "2024-01-07", SENSOR_1: 28, SENSOR_2: 35, SENSOR_3: 30, SENSOR_4: 25 },
-]
+function generateTimeSlots() {
+  const times = [];
+  for (let i = 0; i < 24; i++) {
+    for (let j = 0; j < 60; j += 1) {
+      const hour = i < 10 ? `0${i}` : i;
+      const minute = j < 10 ? `0${j}` : j;
+      times.push(`${hour}:${minute}`);
+    }
+  }
+  return times;
+}
 
-const chartConfig = {
-  SENSOR_1: {
-    label: "Sensor 1",
-    color: "hsl(var(--chart-1))",
-  },
-  SENSOR_2: {
-    label: "Sensor 2",
-    color: "hsl(var(--chart-2))",
-  },
-  SENSOR_3: {
-    label: "Sensor 3",
-    color: "hsl(var(--chart-3))",
-  },
-  SENSOR_4: {
-    label: "Sensor 4",
-    color: "hsl(var(--chart-4))",
-  },
-} satisfies ChartConfig
+function mergeDataWithTimeSlots(data: any[]) {
+  const timeSlots = generateTimeSlots();
+  const dataMap = data.reduce((acc, entry) => {
+    const date = new Date(entry.created_at);
+    const time = date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    acc[time] = entry.SENSOR_DATA;
+    return acc;
+  }, {});
 
-export function BinLevelsDailyChart() {
+  return timeSlots.map((time) => ({
+    created_at: time,
+    SENSOR_DATA: dataMap[time] || null,
+  }));
+}
+
+export function BinDailyChart({
+  data,
+  header = "",
+}: {
+  data: {
+    created_at: string;
+    SENSOR_DATA: number;
+  }[];
+  header: string;
+}) {
+  const processedData = mergeDataWithTimeSlots(data);
+
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Bin Levels - Daily</CardTitle>
-        <CardDescription>Showing daily bin levels</CardDescription>
+    <Card className="w-full h-full">
+      <CardHeader className="flex items-center gap-2 py-5 space-y-0 border-b sm:flex-row">
+        <div className="grid flex-1 gap-1 text-center sm:text-left">
+          <CardTitle>{header} Bin Level</CardTitle>
+        </div>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <BarChart accessibilityLayer data={chartData}>
+      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+        <ChartContainer
+          config={dailyChartConfig}
+          className="aspect-auto h-[250px] w-full"
+        >
+          <AreaChart data={processedData}>
+            <defs>
+              <linearGradient id="fillSensorData" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-sensor_data)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-sensor_data)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+            </defs>
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="date"
+              dataKey="created_at"
               tickLine={false}
-              tickMargin={10}
               axisLine={false}
+              tickMargin={8}
+              minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value)
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })
+                const [hour, minute] = value.split(":");
+                const date = new Date();
+                date.setHours(hour, minute);
+                return date.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                });
               }}
             />
             <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="dashed" />}
+              cursor={true}
+              content={
+                <ChartTooltipContent
+                  labelFormatter={(value) => {
+                    return new Date(`1970-01-01T${value}:00`).toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    });
+                  }}
+                  indicator="line"
+                />
+              }
             />
-            <Bar dataKey="SENSOR_1" fill="var(--color-SENSOR_1)" radius={4} />
-            <Bar dataKey="SENSOR_2" fill="var(--color-SENSOR_2)" radius={4} />
-            <Bar dataKey="SENSOR_3" fill="var(--color-SENSOR_3)" radius={4} />
-            <Bar dataKey="SENSOR_4" fill="var(--color-SENSOR_4)" radius={4} />
-          </BarChart>
+            <Area
+              dataKey="SENSOR_DATA"
+              type="natural"
+              fill="url(#fillSensorData)"
+              stroke="var(--color-sensor_data)"
+              stackId="a"
+            />
+          </AreaChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="w-4 h-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing daily bin levels for the past week
-        </div>
-      </CardFooter>
     </Card>
-  )
+  );
 }
