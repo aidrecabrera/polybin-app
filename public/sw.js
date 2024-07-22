@@ -1,4 +1,5 @@
 self.addEventListener('push', event => {
+  console.log('Push event received:', event);
   const data = event.data.json();
   const options = {
     body: data.body,
@@ -20,6 +21,7 @@ if ('serviceWorker' in navigator) {
 }
 
 self.addEventListener('fetch', (event) => {
+  console.log('Fetch event for:', event.request.url);
   if (event.request.url.includes('/alerts/')) {
     return;
   }
@@ -27,5 +29,17 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
     })
+  );
+});
+
+
+import { precacheAndRoute } from 'workbox-precaching';
+
+precacheAndRoute(self.__WB_MANIFEST);
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('/')
   );
 });

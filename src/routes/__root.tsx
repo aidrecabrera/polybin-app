@@ -4,7 +4,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { Layout } from "@/layout/layout";
 import { useQueryClient } from "@tanstack/react-query";
 import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
@@ -23,13 +22,41 @@ const audioMap: { [key: string]: string } = {
   empty: "/alerts/please_empty.mp3",
 };
 
+let audioQueue: string[] = [];
+let isPlaying = false;
+
 const playAudio = (audioPath: string) => {
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<void>((resolve) => {
     const audio = new Audio(audioPath);
     audio.onended = () => resolve();
-    audio.onerror = (e) => reject(e);
-    audio.play().catch((e) => reject(e));
+    audio.onerror = (e) => {
+      console.error("Audio play error:", e);
+      resolve();
+    };
+    audio.play().catch((e) => {
+      console.error("Audio play error:", e);
+      resolve();
+    });
   });
+};
+
+const processAudioQueue = async () => {
+  if (isPlaying || audioQueue.length === 0) return;
+
+  isPlaying = true;
+  const audioPath = audioQueue.shift();
+  if (audioPath) {
+    try {
+      await playAudio(audioPath);
+      if (audioPath !== audioMap["empty"]) {
+        await playAudio(audioMap["empty"]);
+      }
+    } catch (error) {
+      console.error("Audio play error:", error);
+    }
+  }
+  isPlaying = false;
+  processAudioQueue();
 };
 
 const requestNotificationPermission = async () => {
@@ -52,6 +79,23 @@ export const Route = createRootRoute({
   component: () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+
+    useEffect(() => {
+      if ('Notification' in window && navigator.serviceWorker) {
+        Notification.requestPermission().then(status => {
+          if (status === 'granted') {
+            navigator.serviceWorker.ready.then(registration => {
+              registration.showNotification('Test Notification', {
+                body: 'This is a test notification',
+                icon: '/icon-192x192.png',
+              });
+            });
+          } else {
+            console.log('Notification permission denied:', status);
+          }
+        });
+      }
+    }, []);
 
     useEffect(() => {
       const setupNotifications = async () => {
@@ -94,15 +138,17 @@ export const Route = createRootRoute({
                 },
               }
             );
+
+            audioQueue.push(audioMap[(payload.new as { bin_type: string }).bin_type]);
+            processAudioQueue();
+
             try {
-              await playAudio(audioMap[(payload.new as { bin_type: string }).bin_type]);
-              await playAudio(audioMap["empty"]);
               await sendNotification(`Alert: The ${binType} bin is full`, {
                 body: `As of ${createdAt}`,
                 icon: 'icon-192x192.png', 
               });
             } catch (error) {
-              console.error("Audio play error:", error);
+              console.error("Notification error:", error);
             }
             queryClient.invalidateQueries({ queryKey: ["recentAlerts"] });
           }
@@ -111,8 +157,9 @@ export const Route = createRootRoute({
 
       return () => {
         channel.unsubscribe();
+        audioQueue = [];
       };
-    }, [queryClient]);
+    }, [queryClient, navigate]);
 
     return (
       <>
@@ -123,7 +170,6 @@ export const Route = createRootRoute({
           <Outlet />
           <Toaster richColors position="top-center" />
         </Layout>
-        <TanStackRouterDevtools />
       </>
     );
   },

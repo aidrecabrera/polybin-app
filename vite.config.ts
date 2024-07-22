@@ -1,64 +1,56 @@
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
-import viteReact from "@vitejs/plugin-react-swc";
-import path from "path";
-import { defineConfig } from "vite";
-import { VitePWA } from "vite-plugin-pwa";
+import viteReact from '@vitejs/plugin-react-swc';
+import path from 'path';
+import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   plugins: [
-    TanStackRouterVite(),
     viteReact(),
     VitePWA({
-      injectRegister: "auto",
-      registerType: "autoUpdate",
-      base: "/",
-      scope: "/",
-      includeAssets: ["**/*"],
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
       manifest: {
-        theme_color: "#003e21",
-        background_color: "#003e21",
-        display: "fullscreen",
-        scope: "/",
-        start_url: "/",
-        name: "eSigBin",
-        short_name: "eSigBin",
-        description: "Your Automated Solid Waste Segregation Solution",
+        theme_color: '#003e21',
+        background_color: '#003e21',
+        display: 'fullscreen',
+        scope: '/',
+        start_url: '/',
+        name: 'eSigBin',
+        short_name: 'eSigBin',
+        description: 'Your Automated Solid Waste Segregation Solution',
         icons: [
           {
-            src: "/icon-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
+            src: '/icon-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
           },
           {
-            src: "/icon-256x256.png",
-            sizes: "256x256",
-            type: "image/png",
+            src: '/icon-256x256.png',
+            sizes: '256x256',
+            type: 'image/png',
           },
           {
-            src: "/icon-384x384.png",
-            sizes: "384x384",
-            type: "image/png",
+            src: '/icon-384x384.png',
+            sizes: '384x384',
+            type: 'image/png',
           },
           {
-            src: "/icon-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
+            src: '/icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
           },
         ],
-      },
-      devOptions: {
-        enabled: true,
       },
       workbox: {
-        globPatterns: [
-          "**/*.{js,css,html,ico,png,svg,jpg,jpeg,gif,webp,woff,woff2,ttf,eot,otf,mdx}",
-        ],
         runtimeCaching: [
           {
             urlPattern: /.*/i,
-            handler: "NetworkFirst",
+            handler: 'NetworkFirst',
             options: {
-              cacheName: "all-content-cache",
+              cacheName: 'all-content-cache',
               expiration: {
                 maxEntries: 500,
                 maxAgeSeconds: 60 * 60 * 24 * 365,
@@ -70,9 +62,9 @@ export default defineConfig({
           },
           {
             urlPattern: /\.(js|css|html)$/,
-            handler: "StaleWhileRevalidate",
+            handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: "assets-cache",
+              cacheName: 'assets-cache',
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
@@ -81,9 +73,9 @@ export default defineConfig({
           },
           {
             urlPattern: /\.(png|jpg|jpeg|svg|gif|webp)$/,
-            handler: "CacheFirst",
+            handler: 'CacheFirst',
             options: {
-              cacheName: "image-cache",
+              cacheName: 'image-cache',
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
@@ -95,9 +87,9 @@ export default defineConfig({
           },
           {
             urlPattern: /\.(woff|woff2|ttf|eot|otf)$/,
-            handler: "CacheFirst",
+            handler: 'CacheFirst',
             options: {
-              cacheName: "font-cache",
+              cacheName: 'font-cache',
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24 * 365,
@@ -107,10 +99,11 @@ export default defineConfig({
         ],
       },
     }),
+    
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
 });
