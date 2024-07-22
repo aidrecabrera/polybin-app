@@ -43,7 +43,6 @@ import { useEffect, useState } from "react"
   export function DataTable<TData, TValue>({
     columns,
     data,
-    total,
     setStartDate,
     setEndDate,
     pageCount,
