@@ -32,12 +32,38 @@ const playAudio = (audioPath: string) => {
   });
 };
 
+const requestNotificationPermission = async () => {
+  if ('Notification' in window && navigator.serviceWorker) {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      throw new Error('Permission not granted for Notification');
+    }
+  }
+};
+
+const sendNotification = async (title: string, options: NotificationOptions) => {
+  if (navigator.serviceWorker) {
+    const registration = await navigator.serviceWorker.ready;
+    registration.showNotification(title, options);
+  }
+};
+
 export const Route = createRootRoute({
   component: () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
     useEffect(() => {
+      const setupNotifications = async () => {
+        try {
+          await requestNotificationPermission();
+        } catch (error) {
+          console.error("Notification permission error:", error);
+        }
+      };
+
+      setupNotifications();
+
       const channel = supabase
         .channel("alert_log")
         .on(
@@ -71,6 +97,10 @@ export const Route = createRootRoute({
             try {
               await playAudio(audioMap[(payload.new as { bin_type: string }).bin_type]);
               await playAudio(audioMap["empty"]);
+              await sendNotification(`Alert: The ${binType} bin is full`, {
+                body: `As of ${createdAt}`,
+                icon: 'icon-192x192.png', 
+              });
             } catch (error) {
               console.error("Audio play error:", error);
             }
