@@ -1,5 +1,8 @@
+import { supabase } from "@/client/supabaseClient";
 import { getPastWeekDates } from "@/lib/utils";
 import { getWeekDisposeLog } from "@/services/disposeLog";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import WeeklyDisposalChart from "./weekly-disposal-chart";
 
 interface DisposeLog {
@@ -14,11 +17,33 @@ interface ProcessedData {
 }
 
 function WeeklyDisposalComponent() {
+  const queryClient = useQueryClient();
   const { data, isLoading, error } = getWeekDisposeLog();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('dispose_log')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'dispose_log',
+        },
+        (payload) => {
+          console.log(payload);
+          queryClient.invalidateQueries({ queryKey: ['weekDisposeLog'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [queryClient]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading data</div>;
-
   if (!data) return <div>No data available</div>;
 
   const processedData: ProcessedData = data.reduce(

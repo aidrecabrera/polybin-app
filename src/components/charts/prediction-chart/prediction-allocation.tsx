@@ -1,6 +1,5 @@
 "use client"
 
-import { TrendingUp } from "lucide-react"
 import * as React from "react"
 import { Label, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 
@@ -18,15 +17,21 @@ import {
 } from "@/components/ui/chart"
 import { fetchPredictionLogFromSupabase } from "@/services/predictionLog"
 
+interface ChartData {
+  class: string;
+  percentage: number;
+  fill: string;
+}
+
 const chartConfig = {
   confidence: {
     label: "Confidence",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--chart-2))",
   },
 } as const
 
 export default function PredictionLogPieChart() {
-  const [data, setData] = React.useState<{ class: string; confidence: number; fill: string }[]>([])
+  const [data, setData] = React.useState<ChartData[]>([])
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -46,9 +51,11 @@ export default function PredictionLogPieChart() {
         return acc
       }, {})
 
+      const totalConfidence = Object.values(processedData).reduce((acc, value) => acc + value.totalConfidence, 0)
+
       const chartData = Object.entries(processedData).map(([key, value]) => ({
         class: key,
-        confidence: Number((value.totalConfidence / value.count).toFixed(2)),
+        percentage: Math.round((value.totalConfidence / totalConfidence) * 100),
         fill: `hsl(var(--chart-${Math.floor(Math.random() * 5) + 1}))`, // Random color
       }))
 
@@ -64,8 +71,8 @@ export default function PredictionLogPieChart() {
     fetchData()
   }, [])
 
-  const totalConfidence = React.useMemo(() => {
-    return data.reduce((acc, curr) => acc + curr.confidence, 0).toFixed(2)
+  const totalPercentage = React.useMemo(() => {
+    return data.reduce((acc, curr) => acc + curr.percentage, 0)
   }, [data])
 
   return (
@@ -92,11 +99,15 @@ export default function PredictionLogPieChart() {
               <PieChart>
                 <Tooltip
                   cursor={false}
-                  content={<ChartTooltipContent hideLabel />}
+                  content={<ChartTooltipContent />}
+                  formatter={(value, name) => [
+                    `${value}% `,
+                    name.toString().charAt(0).toUpperCase() + name.toString().slice(1),
+                  ]}
                 />
                 <Pie
                   data={data}
-                  dataKey="confidence"
+                  dataKey="percentage"
                   nameKey="class"
                   innerRadius={60}
                   strokeWidth={5}
@@ -116,14 +127,14 @@ export default function PredictionLogPieChart() {
                               y={viewBox.cy}
                               className="text-3xl font-bold fill-foreground"
                             >
-                              {totalConfidence}
+                              {totalPercentage}%
                             </tspan>
                             <tspan
                               x={viewBox.cx}
                               y={(viewBox.cy || 0) + 24}
                               className="fill-muted-foreground"
                             >
-                              Confidence
+                              Total Confidence
                             </tspan>
                           </text>
                         )
@@ -137,11 +148,8 @@ export default function PredictionLogPieChart() {
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="w-4 h-4" />
-        </div>
         <div className="leading-none text-muted-foreground">
-          Showing average confidence for the last 100 predictions
+          Showing percentage confidence distribution for the last 100 predictions
         </div>
       </CardFooter>
     </Card>

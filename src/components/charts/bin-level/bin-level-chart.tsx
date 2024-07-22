@@ -42,7 +42,7 @@ const binLevelChartConfig = {
     label: "Hazardous",
     color: "hsl(var(--chart-4))",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 interface ChartDataItem {
   sensor: string;
@@ -56,7 +56,7 @@ export function BinLevelChart({ chartData }: { chartData: ChartDataItem[] }) {
     return {
       bin: binName,
       percentage: Math.max(0, Math.min(100, percentage)),
-      binPercentageLabel: `${binName})`,
+      binPercentageLabel: `${binName}`,
       // @ts-ignore
       fill: binLevelChartConfig[binName as keyof typeof binLevelChartConfig].color,
     };
@@ -76,7 +76,7 @@ export function BinLevelChart({ chartData }: { chartData: ChartDataItem[] }) {
           <RadialBarChart
             data={processedChartData}
             startAngle={-90}
-            endAngle={360}
+            endAngle={270}
             innerRadius={30}
             outerRadius={110}
           >
@@ -104,5 +104,5 @@ export function BinLevelChart({ chartData }: { chartData: ChartDataItem[] }) {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

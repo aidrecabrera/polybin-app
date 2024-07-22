@@ -24,14 +24,14 @@ export function getWeekDisposeLog() {
   });
 }
 
-export function getRecentDisposal() {
+export function getRecentDisposal(limit: number = 8) {
   return useQuery({
     queryKey: ["recentDisposal"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("dispose_log")
         .select("*")
-        .limit(8)
+        .limit(limit)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];

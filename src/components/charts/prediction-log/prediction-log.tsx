@@ -1,3 +1,4 @@
+import { supabase } from "@/client/supabaseClient";
 import {
   Card,
   CardContent,
@@ -11,14 +12,38 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { getWeekPredictionLog } from "@/services/predictionLog";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Area, AreaChart, Label, ReferenceLine } from "recharts";
 
 export default function PredictionChart() {
+  const queryClient = useQueryClient();
   const { data: prediction_log, isLoading, error } = getWeekPredictionLog();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('prediction_log')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'prediction_log',
+        },
+        (payload) => {
+          console.log(payload);
+          queryClient.invalidateQueries({ queryKey: ['weekPredictionLog'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [queryClient]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading data</div>;
-
   if (!prediction_log) return <div>No data available</div>;
 
   const chartData = prediction_log.map(
@@ -43,7 +68,7 @@ export default function PredictionChart() {
       <CardHeader className="p-4 pb-0">
         <CardTitle>Average Confidence</CardTitle>
         <CardDescription>
-          Over the last 100 prediction, the average confidence of detections was{" "}
+          Over the last 100 predictions, the average confidence of detections was{" "}
           {averageConfidence.toFixed(2)}.
         </CardDescription>
       </CardHeader>
@@ -62,7 +87,7 @@ export default function PredictionChart() {
                 color: "hsl(var(--chart-2))",
               },
             }}
-            className="w-full ml-auto h-[107px]"
+            className="w-full ml-auto hidden sm:block sm:h-[107px]"
           >
             <AreaChart
               width={500}
@@ -101,15 +126,13 @@ export default function PredictionChart() {
                 strokeWidth={1}
               >
                 <Label
-                position="insideTopRight"
-                value={
-                  "Avg. Confidence"
-                }
-                fill="hsl(var(--foreground))"
-                offset={15}
-                fontSize={14}
-                fontWeight={400}
-              />
+                  position="insideTopRight"
+                  value={"Avg. Confidence"}
+                  fill="hsl(var(--foreground))"
+                  offset={15}
+                  fontSize={14}
+                  fontWeight={400}
+                />
               </ReferenceLine>
             </AreaChart>
           </ChartContainer>
