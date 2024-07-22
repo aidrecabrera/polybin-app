@@ -62,7 +62,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6 text-primary">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Trash className="w-6 h-6" />
-              <span className="">eSigBin</span>
+              <span className="">e-SegBin</span>
             </Link>
           </div>
           <div className="flex-1">

@@ -20,8 +20,8 @@ export default defineConfig({
         display: "fullscreen",
         scope: "/",
         start_url: "/",
-        name: "eSigBin",
-        short_name: "eSigBin",
+        name: "e-SegBin",
+        short_name: "e-SegBin",
         description: "Your Automated Solid Waste Segregation Solution",
         icons: [
           {
