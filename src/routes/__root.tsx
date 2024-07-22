@@ -81,23 +81,6 @@ export const Route = createRootRoute({
     const queryClient = useQueryClient();
 
     useEffect(() => {
-      if ('Notification' in window && navigator.serviceWorker) {
-        Notification.requestPermission().then(status => {
-          if (status === 'granted') {
-            navigator.serviceWorker.ready.then(registration => {
-              registration.showNotification('Test Notification', {
-                body: 'This is a test notification',
-                icon: '/icon-192x192.png',
-              });
-            });
-          } else {
-            console.log('Notification permission denied:', status);
-          }
-        });
-      }
-    }, []);
-
-    useEffect(() => {
       const setupNotifications = async () => {
         try {
           await requestNotificationPermission();
