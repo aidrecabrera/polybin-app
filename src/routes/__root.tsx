@@ -26,16 +26,9 @@ const audioMap: { [key: string]: string } = {
 const playAudio = (audioPath: string) => {
   return new Promise<void>((resolve, reject) => {
     const audio = new Audio(audioPath);
-    const onAudioLoad = () => {
-      audio.removeEventListener('canplaythrough', onAudioLoad);
-      audio.play().then(resolve).catch(reject);
-    };
-    audio.addEventListener('canplaythrough', onAudioLoad);
-    audio.onerror = (e) => {
-      audio.removeEventListener('canplaythrough', onAudioLoad);
-      reject(e);
-    };
-    audio.load();
+    audio.onended = () => resolve();
+    audio.onerror = (e) => reject(e);
+    audio.play().catch((e) => reject(e));
   });
 };
 
