@@ -43,7 +43,6 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
-  total,
   setStartDate,
   setEndDate,
   pageCount,
