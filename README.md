@@ -1,3 +1,7 @@
+<div align="center">
+  <p><img src="./resources/intro.png"/></p>
+</div>
+
 ## Overview
 
 A dedicated web portal for [Project Polybin](https://github.com/aidrecabrera/polybin): an automated smart waste segregation system with machine learning and edge computing. This portal is a Progressive Web Application (PWA) that provides real-time monitoring of bin levels, disposal records, and inference performance. It also includes features such as confidence distribution visualization, alerts, and audio notifications for critical events.
@@ -15,7 +19,7 @@ A dedicated web portal for [Project Polybin](https://github.com/aidrecabrera/pol
 
 ## Why?
 
-To make the functioning of the Polybin project even better, it is further infused with some analytics, performance tracking, and monitoring features for actionable insights. This scale-up integrates a extended notification systems so that alert notifications can reach the users, especially the *janitors*, when the bins are full.
+To make the functioning of the Polybin project even better, it is further infused with some analytics, performance tracking, and monitoring features for actionable insights. This scale-up integrates a extended notification systems so that alert notifications can reach the users, especially the _janitors_, when the bins are full.
 
 The PWA feature is crucial here because it allows wide accessibility and easy communication. Notifications could be sent either on a computer or on a smartphone (also through SMS and the actual device), with audio alerts in order to communicate an update that is both timely and unobtrusive.
 
@@ -23,6 +27,10 @@ The data acquired from the Polybin is processed and pushed to the Supabase backe
 
 > [!NOTE]
 > The application is not designed for real-time control of the system, but rather for monitoring and analysis.
+
+<div align="center">
+  <p><img src="./resources/pwa.png"/></p>
+</div>
 
 ### Offline Mode Access
 
@@ -127,7 +135,7 @@ useEffect(() => {
 
 ## Data Schema
 
-````sql
+```sql
 CREATE TABLE IF NOT EXISTS public.alert_log (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -161,7 +169,7 @@ CREATE TABLE IF NOT EXISTS public.prediction_log (
     id UUID NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc')
 ) TABLESPACE pg_default;
-````
+```
 
 ### Key Technologies
 
