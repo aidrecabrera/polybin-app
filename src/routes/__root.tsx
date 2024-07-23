@@ -188,7 +188,7 @@ export const Route = createRootRoute({
 
     if (!session?.session) {
       return (
-        <div className="flex items-center justify-center h-screen">
+        <div className="flex items-center justify-center w-screen h-screen">
           <LoginForm />
         </div>
       );
