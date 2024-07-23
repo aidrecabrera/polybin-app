@@ -5,7 +5,7 @@ import { Layout } from "@/layout/layout";
 import { isAuthenticated } from "@/lib/auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 const binTypeMap: { [key: string]: string } = {
@@ -83,6 +83,9 @@ export const Route = createRootRoute({
   component: () => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+    const { data: session, isLoading } = isAuthenticated();
 
     useEffect(() => {
       const setupNotifications = async (): Promise<void> => {
@@ -95,62 +98,92 @@ export const Route = createRootRoute({
 
       setupNotifications();
 
-      const channel = supabase
-        .channel("alert_log")
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "alert_log",
-          },
-          async (payload) => {
-            console.log("Channel payload", payload);
-            const binType =
-              binTypeMap[(payload.new as { bin_type: string }).bin_type] ||
-              "Unknown";
-            const createdAt = new Date(
-              (payload.new as { created_at: string }).created_at
-            ).toLocaleString();
-            toast.error(
-              `Alert: The ${binType} bin is full as of ${createdAt}`,
-              {
-                cancel: {
-                  label: "View Bin Status",
-                  onClick: () => {
-                    navigate({ to: "/bin" });
+      if (session?.session) {
+        channelRef.current = supabase
+          .channel("alert_log")
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "alert_log",
+            },
+            async (payload) => {
+              console.log("Channel payload", payload);
+              const binType =
+                binTypeMap[(payload.new as { bin_type: string }).bin_type] ||
+                "Unknown";
+              const createdAt = new Date(
+                (payload.new as { created_at: string }).created_at
+              ).toLocaleString();
+              toast.error(
+                `Alert: The ${binType} bin is full as of ${createdAt}`,
+                {
+                  cancel: {
+                    label: "View Bin Status",
+                    onClick: () => {
+                      navigate({ to: "/bin" });
+                    },
                   },
-                },
+                }
+              );
+
+              audioQueue.push(
+                audioMap[(payload.new as { bin_type: string }).bin_type]
+              );
+              processAudioQueue();
+
+              try {
+                await sendNotification(`Alert: The ${binType} bin is full`, {
+                  body: `As of ${createdAt}`,
+                  icon: "icon-192x192.png",
+                });
+              } catch (error) {
+                console.error("Notification error:", error);
               }
-            );
-
-            audioQueue.push(
-              audioMap[(payload.new as { bin_type: string }).bin_type]
-            );
-            processAudioQueue();
-
-            try {
-              await sendNotification(`Alert: The ${binType} bin is full`, {
-                body: `As of ${createdAt}`,
-                icon: "icon-192x192.png",
-              });
-            } catch (error) {
-              console.error("Notification error:", error);
+              queryClient.invalidateQueries({ queryKey: ["recentAlerts"] });
             }
-            queryClient.invalidateQueries({ queryKey: ["recentAlerts"] });
-          }
-        )
-        .subscribe();
+          )
+          .subscribe();
+      }
 
       return () => {
-        channel.unsubscribe();
+        if (channelRef.current) {
+          channelRef.current.unsubscribe();
+          channelRef.current = null;
+        }
         audioQueue = [];
       };
-    }, [queryClient, navigate]);
-    const { data: session, isLoading } = isAuthenticated();
+    }, [queryClient, navigate, session]);
 
     if (isLoading) {
-      return <div>Loading...</div>;
+      return (
+        <div className="flex flex-row items-center justify-center w-screen h-screen ">
+          <div className="flex flex-row font-semibold leading-6 transition duration-150 ease-in-out rounded-md shadow cursor-not-allowed text-md text-primary">
+            <svg
+              className="w-5 h-5 mt-1 mr-3 -ml-1 text-white animate-spin"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Loading...
+          </div>
+        </div>
+      );
     }
 
     if (!session?.session) {
@@ -160,6 +193,7 @@ export const Route = createRootRoute({
         </div>
       );
     }
+
     return (
       <>
         <div className="fixed top-0 right-0 z-50 p-4">
