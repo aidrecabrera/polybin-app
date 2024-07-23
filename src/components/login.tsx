@@ -2,9 +2,8 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 import {
   Form,
@@ -58,10 +57,7 @@ export function LoginForm() {
   return (
     <Card className="max-w-sm mx-auto">
       <CardHeader>
-        <CardTitle className="text-xl">Sign Up</CardTitle>
-        <CardDescription>
-          Enter your information to create an account
-        </CardDescription>
+        <CardTitle className="text-xl">Login</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
