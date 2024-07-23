@@ -1,7 +1,8 @@
 import { supabase } from "@/client/supabaseClient";
+import { LoginForm } from "@/components/login";
 import { ModeToggle } from "@/components/theme/theme-toggle";
-import { Toaster } from "@/components/ui/sonner";
 import { Layout } from "@/layout/layout";
+import { isAuthenticated } from "@/lib/auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -25,7 +26,7 @@ const audioMap: { [key: string]: string } = {
 let audioQueue: string[] = [];
 let isPlaying = false;
 
-const playAudio = (audioPath: string) => {
+const playAudio = (audioPath: string): Promise<void> => {
   return new Promise<void>((resolve) => {
     const audio = new Audio(audioPath);
     audio.onended = () => resolve();
@@ -40,7 +41,7 @@ const playAudio = (audioPath: string) => {
   });
 };
 
-const processAudioQueue = async () => {
+const processAudioQueue = async (): Promise<void> => {
   if (isPlaying || audioQueue.length === 0) return;
 
   isPlaying = true;
@@ -59,16 +60,19 @@ const processAudioQueue = async () => {
   processAudioQueue();
 };
 
-const requestNotificationPermission = async () => {
-  if ('Notification' in window && navigator.serviceWorker) {
+const requestNotificationPermission = async (): Promise<void> => {
+  if ("Notification" in window && navigator.serviceWorker) {
     const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      throw new Error('Permission not granted for Notification');
+    if (permission !== "granted") {
+      throw new Error("Permission not granted for Notification");
     }
   }
 };
 
-const sendNotification = async (title: string, options: NotificationOptions) => {
+const sendNotification = async (
+  title: string,
+  options: NotificationOptions
+): Promise<void> => {
   if (navigator.serviceWorker) {
     const registration = await navigator.serviceWorker.ready;
     registration.showNotification(title, options);
@@ -81,7 +85,7 @@ export const Route = createRootRoute({
     const queryClient = useQueryClient();
 
     useEffect(() => {
-      const setupNotifications = async () => {
+      const setupNotifications = async (): Promise<void> => {
         try {
           await requestNotificationPermission();
         } catch (error) {
@@ -114,21 +118,21 @@ export const Route = createRootRoute({
                 cancel: {
                   label: "View Bin Status",
                   onClick: () => {
-                    navigate({
-                      to: "/bin",
-                    });
+                    navigate({ to: "/bin" });
                   },
                 },
               }
             );
 
-            audioQueue.push(audioMap[(payload.new as { bin_type: string }).bin_type]);
+            audioQueue.push(
+              audioMap[(payload.new as { bin_type: string }).bin_type]
+            );
             processAudioQueue();
 
             try {
               await sendNotification(`Alert: The ${binType} bin is full`, {
                 body: `As of ${createdAt}`,
-                icon: 'icon-192x192.png', 
+                icon: "icon-192x192.png",
               });
             } catch (error) {
               console.error("Notification error:", error);
@@ -143,7 +147,19 @@ export const Route = createRootRoute({
         audioQueue = [];
       };
     }, [queryClient, navigate]);
+    const { data: session, isLoading } = isAuthenticated();
 
+    if (isLoading) {
+      return <div>Loading...</div>;
+    }
+
+    if (!session?.session) {
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <LoginForm />
+        </div>
+      );
+    }
     return (
       <>
         <div className="fixed top-0 right-0 z-50 p-4">
@@ -151,7 +167,6 @@ export const Route = createRootRoute({
         </div>
         <Layout>
           <Outlet />
-          <Toaster richColors position="top-center" />
         </Layout>
       </>
     );
