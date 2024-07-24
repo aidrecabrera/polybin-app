@@ -115,10 +115,12 @@ export function DataTable<TData, TValue>({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <DatePickerWithRange
-            setStartDate={setStartDate}
-            setEndDate={setEndDate}
-          />
+          <div className="w-auto">
+            <DatePickerWithRange
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
+            />
+          </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

@@ -74,9 +74,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
     });
   }
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <div className="hidden border-r bg-muted/40 md:block">
-        <div className="flex flex-col h-full max-h-screen gap-2">
+    <div className="w-full min-h-screen">
+      <div className="fixed top-0 left-0 h-screen hidden border-r bg-muted/40 md:block md:w-[220px] lg:w-[280px] overflow-y-auto">
+        <div className="flex flex-col h-full gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6 text-primary">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Trash className="w-6 h-6" />
@@ -99,7 +99,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col md:ml-[220px] lg:ml-[280px]">
         <header className="flex items-center gap-4 p-4 lg:px-6 lg:hidden">
           <Sheet>
             <SheetTrigger asChild>
@@ -139,8 +139,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </SheetContent>
           </Sheet>
         </header>
-        <main className="flex flex-col flex-1 gap-4 px-6 lg:gap-6 lg:p-8">
-          {children}
+        <main className="flex-1 overflow-y-auto">
+          <div className="flex flex-col gap-4 px-6 py-8 lg:gap-6 lg:p-8">
+            {children}
+          </div>
         </main>
       </div>
     </div>
