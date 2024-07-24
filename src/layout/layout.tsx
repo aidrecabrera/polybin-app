@@ -6,6 +6,7 @@ import {
   Menu,
   Trash,
   Trash2,
+  TriangleAlertIcon,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +21,7 @@ const navLinks = [
   { href: "/bin", icon: Trash2, label: "Bin Status" },
   { href: "/dispose", icon: Combine, label: "Dispose Logs" },
   { href: "/prediction", icon: BrainCog, label: "Prediction" },
+  { href: "/alerts", icon: TriangleAlertIcon, label: "Alerts" },
 ];
 
 const renderNavLink = (link: any) => (

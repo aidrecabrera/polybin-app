@@ -19,6 +19,7 @@ import { Route as rootRoute } from './routes/__root'
 const PredictionLazyImport = createFileRoute('/prediction')()
 const DisposeLazyImport = createFileRoute('/dispose')()
 const BinLazyImport = createFileRoute('/bin')()
+const AlertsLazyImport = createFileRoute('/alerts')()
 const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
@@ -38,6 +39,11 @@ const BinLazyRoute = BinLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/bin.lazy').then((d) => d.Route))
 
+const AlertsLazyRoute = AlertsLazyImport.update({
+  path: '/alerts',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/alerts.lazy').then((d) => d.Route))
+
 const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
@@ -52,6 +58,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/alerts': {
+      id: '/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AlertsLazyImport
       parentRoute: typeof rootRoute
     }
     '/bin': {
@@ -82,6 +95,7 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexLazyRoute,
+  AlertsLazyRoute,
   BinLazyRoute,
   DisposeLazyRoute,
   PredictionLazyRoute,
@@ -96,6 +110,7 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/alerts",
         "/bin",
         "/dispose",
         "/prediction"
@@ -103,6 +118,9 @@ export const routeTree = rootRoute.addChildren({
     },
     "/": {
       "filePath": "index.lazy.tsx"
+    },
+    "/alerts": {
+      "filePath": "alerts.lazy.tsx"
     },
     "/bin": {
       "filePath": "bin.lazy.tsx"

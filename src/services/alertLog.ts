@@ -17,3 +17,19 @@ export function getRecentAlerts(limit = 5) {
     },
   });
 }
+
+export function getAllAlerts() {
+  return useQuery({
+    queryKey: ['allAlerts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('alert_log')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return data;
+    },
+  });
+}
