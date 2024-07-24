@@ -81,22 +81,31 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center py-4 -mt-4">
-        <div className="flex flex-row gap-2">
+      <div className="flex flex-col w-full gap-2 mb-4 sm:flex-row">
+        <div className="flex flex-col w-full gap-2 sm:flex-row sm:w-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
+              <Button variant="outline" className="w-full sm:w-auto">
                 Filter Class
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {["Non-biodegradable", "Hazardous", "Recyclable", "Bio-degradable"].map((classType) => (
+            <DropdownMenuContent align="end" className="w-full sm:w-auto">
+              {[
+                "Non-biodegradable",
+                "Hazardous",
+                "Recyclable",
+                "Bio-degradable",
+              ].map((classType) => (
                 <DropdownMenuCheckboxItem
                   key={classType}
                   className="capitalize"
-                  checked={table.getColumn("class")?.getFilterValue() === classType}
+                  checked={
+                    table.getColumn("class")?.getFilterValue() === classType
+                  }
                   onCheckedChange={(value) =>
-                    table.getColumn("class")?.setFilterValue(value ? classType : undefined)
+                    table
+                      .getColumn("class")
+                      ?.setFilterValue(value ? classType : undefined)
                   }
                 >
                   {classType}
@@ -107,15 +116,16 @@ export function DataTable<TData, TValue>({
           <DatePickerWithRange
             setStartDate={setStartDate}
             setEndDate={setEndDate}
+            className="w-full sm:w-auto"
           />
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button variant="outline" className="w-full mt-2 sm:w-auto sm:mt-0">
               Columns
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-full sm:w-auto">
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())

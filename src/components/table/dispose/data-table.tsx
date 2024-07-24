@@ -83,15 +83,15 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center py-4 -mt-4">
-        <div className="flex flex-row gap-2">
+      <div className="flex flex-col items-center justify-between w-full gap-2 py-4 -mt-4 sm:flex-row">
+        <div className="flex flex-col w-full gap-2 sm:flex-row sm:w-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
+              <Button variant="outline" className="w-full sm:w-auto">
                 Filter Bin Type
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-full sm:w-auto">
               {[
                 "Recyclable",
                 "Non-Biodegradable",
@@ -115,7 +115,7 @@ export function DataTable<TData, TValue>({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <div className="w-auto">
+          <div className="w-full sm:w-auto">
             <DatePickerWithRange
               setStartDate={setStartDate}
               setEndDate={setEndDate}
@@ -124,11 +124,11 @@ export function DataTable<TData, TValue>({
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button variant="outline" className="w-full mt-2 sm:w-auto sm:mt-0">
               Columns
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-full sm:w-auto">
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
