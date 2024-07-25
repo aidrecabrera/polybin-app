@@ -21,7 +21,7 @@ const navLinks = [
   { href: "/bin", icon: Trash2, label: "Bin Status" },
   { href: "/dispose", icon: Combine, label: "Dispose Logs" },
   { href: "/prediction", icon: BrainCog, label: "Prediction" },
-  { href: "/alerts", icon: TriangleAlertIcon, label: "Alerts" },
+  { href: "/alerts", icon: TriangleAlertIcon, label: "Waste Management Data" },
 ];
 
 const renderNavLink = (link: any) => (

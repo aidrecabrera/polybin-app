@@ -164,7 +164,7 @@ export function AlertHistoricalChart() {
     <Card>
       <CardHeader className="flex items-center gap-2 py-5 space-y-0 border-b sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle>Alert History by Bin Type</CardTitle>
+          <CardTitle>Visualization of Waste Management Data for Different Bin Types</CardTitle>
           <CardDescription></CardDescription>
         </div>
         <div className="flex items-center gap-2">

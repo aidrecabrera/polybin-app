@@ -1,28 +1,28 @@
 import { DatePickerWithRange } from "@/components/date-picker";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableFooter,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { getAllAlerts } from "@/services/alertLog";
 import { endOfYear, isWithinInterval, startOfYear } from "date-fns";
@@ -181,7 +181,7 @@ export function AlertHistoricalTable(): React.ReactElement {
     <Card>
       <CardHeader className="flex items-center gap-2 py-5 space-y-0 border-b sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle>Alert History</CardTitle>
+          <CardTitle>Distribution of Waste Management Data by Bin Type</CardTitle>
           <CardDescription>
             Non-Biodegradable, Biodegradable, Hazardous, and Recyclable
           </CardDescription>
