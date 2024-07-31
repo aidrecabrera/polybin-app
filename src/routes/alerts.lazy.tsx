@@ -6,8 +6,8 @@ export const Route = createLazyFileRoute("/alerts")({
   component: () => (
     <div>
       <div className="py-4 space-y-4">
-          <AlertHistoricalChart />
-          <AlertHistoricalTable />
+        <AlertHistoricalChart />
+        <AlertHistoricalTable />
       </div>
     </div>
   ),

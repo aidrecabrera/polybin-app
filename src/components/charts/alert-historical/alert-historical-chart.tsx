@@ -4,6 +4,7 @@ import {
   BarChart,
   CartesianGrid,
   Legend,
+  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -63,23 +64,41 @@ export function AlertHistoricalChart() {
   const { data: alertLogs, isLoading, error } = getAllAlerts();
 
   useEffect(() => {
+    console.log("Raw alert logs:", alertLogs);
     if (alertLogs) {
-      const processedData = processAlertData(alertLogs, selectedRange, startDate, endDate);
+      const processedData = processAlertData(
+        alertLogs,
+        selectedRange,
+        startDate,
+        endDate
+      );
+      console.log("Processed chart data:", processedData);
       setChartData(processedData);
     }
   }, [alertLogs, selectedRange, startDate, endDate]);
 
-  const processAlertData = (data: AlertItemProps[], range: string, start: Date, end: Date) => {
+  const processAlertData = (
+    data: AlertItemProps[],
+    range: string,
+    start: Date,
+    end: Date
+  ) => {
     const now = new Date();
-    const filteredData = data.filter((alert) => {
+    const filteredData = (data || []).filter((alert) => {
+      if (!alert || !alert.created_at) return false;
       const alertDate = new Date(alert.created_at);
       switch (range) {
         case "today":
           return alertDate.toDateString() === now.toDateString();
         case "last7days":
-          return (now.getTime() - alertDate.getTime()) / (1000 * 3600 * 24) <= 7;
+          return (
+            (now.getTime() - alertDate.getTime()) / (1000 * 3600 * 24) <= 7
+          );
         case "thisMonth":
-          return alertDate.getMonth() === now.getMonth() && alertDate.getFullYear() === now.getFullYear();
+          return (
+            alertDate.getMonth() === now.getMonth() &&
+            alertDate.getFullYear() === now.getFullYear()
+          );
         case "thisYear":
           return alertDate.getFullYear() === now.getFullYear();
         case "custom":
@@ -88,6 +107,8 @@ export function AlertHistoricalChart() {
           return true;
       }
     });
+
+    console.log("Filtered data:", filteredData);
 
     const groupedData: { [key: string]: { [key: string]: number } } = {};
 
@@ -107,7 +128,11 @@ export function AlertHistoricalChart() {
         }
         break;
       case "thisMonth":
-        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const daysInMonth = new Date(
+          now.getFullYear(),
+          now.getMonth() + 1,
+          0
+        ).getDate();
         for (let i = 1; i <= daysInMonth; i++) {
           const key = i.toString().padStart(2, "0");
           groupedData[key] = { non: 0, bio: 0, haz: 0, rec: 0 };
@@ -123,6 +148,7 @@ export function AlertHistoricalChart() {
     }
 
     filteredData.forEach((alert) => {
+      if (!alert || !alert.created_at) return;
       let key;
       const date = new Date(alert.created_at);
 
@@ -144,10 +170,13 @@ export function AlertHistoricalChart() {
           key = date.toISOString().split("T")[0];
       }
 
-      if (alert.bin_type) {
-        groupedData[key][alert.bin_type] += 1;
+      if (alert.bin_type && groupedData[key]) {
+        groupedData[key][alert.bin_type] =
+          (groupedData[key][alert.bin_type] || 0) + 1;
       }
     });
+
+    console.log("Grouped data:", groupedData);
 
     return Object.entries(groupedData)
       .map(([key, counts]) => ({
@@ -158,13 +187,15 @@ export function AlertHistoricalChart() {
   };
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading data</div>;
+  if (error) return <div>Error loading data: {error.toString()}</div>;
 
   return (
     <Card>
       <CardHeader className="flex items-center gap-2 py-5 space-y-0 border-b sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle>Visualization of Waste Management Data for Different Bin Types</CardTitle>
+          <CardTitle>
+            Visualization of Waste Management Data for Different Bin Types
+          </CardTitle>
           <CardDescription></CardDescription>
         </div>
         <div className="flex items-center gap-2">
@@ -193,67 +224,80 @@ export function AlertHistoricalChart() {
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"
         >
-          <BarChart width={600} height={300} data={chartData}>
-            <CartesianGrid />
-            <XAxis
-              dataKey="key"
-              tickFormatter={(value) => {
-                if (selectedRange === "thisYear" || selectedRange === "custom") {
-                  return [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
-                  ][parseInt(value) - 1];
-                }
-                return value;
-              }}
-            />
-            <YAxis />
-            <Tooltip
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(value) => {
-                    if (selectedRange === "thisYear" || selectedRange === "custom") {
-                      return [
-                        "January",
-                        "February",
-                        "March",
-                        "April",
-                        "May",
-                        "June",
-                        "July",
-                        "August",
-                        "September",
-                        "October",
-                        "November",
-                        "December",
-                      ][parseInt(value) - 1];
-                    }
-                    return value;
-                  }}
-                  indicator="dot"
-                />
-              }
-            />
-            <Legend />
-            {Object.entries(binTypeMap).map(([key, value]) => (
-              <Bar
-                key={key}
-                dataKey={key}
-                name={value}
-                fill={chartConfig[key as keyof typeof chartConfig].color}
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="key"
+                tickFormatter={(value) => {
+                  if (
+                    selectedRange === "thisYear" ||
+                    selectedRange === "custom"
+                  ) {
+                    const monthNames = [
+                      "Jan",
+                      "Feb",
+                      "Mar",
+                      "Apr",
+                      "May",
+                      "Jun",
+                      "Jul",
+                      "Aug",
+                      "Sep",
+                      "Oct",
+                      "Nov",
+                      "Dec",
+                    ];
+                    return monthNames[parseInt(value) - 1] || value;
+                  }
+                  return value;
+                }}
               />
-            ))}
-          </BarChart>
+              <YAxis />
+              <Tooltip
+                content={
+                  <ChartTooltipContent
+                    labelFormatter={(value) => {
+                      if (
+                        selectedRange === "thisYear" ||
+                        selectedRange === "custom"
+                      ) {
+                        const monthNames = [
+                          "January",
+                          "February",
+                          "March",
+                          "April",
+                          "May",
+                          "June",
+                          "July",
+                          "August",
+                          "September",
+                          "October",
+                          "November",
+                          "December",
+                        ];
+                        return monthNames[parseInt(value) - 1] || value;
+                      }
+                      return value;
+                    }}
+                    indicator="dot"
+                  />
+                }
+              />
+              <Legend />
+              {Object.entries(binTypeMap).map(([key, value]) => (
+                <Bar
+                  key={key}
+                  dataKey={key}
+                  name={value}
+                  fill={
+                    chartConfig[key as keyof typeof chartConfig]?.color ||
+                    "#000000"
+                  }
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
     </Card>
