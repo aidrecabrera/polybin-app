@@ -2,7 +2,7 @@ import { supabase } from "@/client/supabaseClient";
 import { getLatestBinLevel } from "@/services/binLevel";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { BinLevelChart } from "./bin-level-chart";
+import { BinLevelChart } from "./bin-level-bar";
 
 function BinLevelComponent() {
   const queryClient = useQueryClient();
@@ -16,7 +16,7 @@ function BinLevelComponent() {
         {
           event: "*",
           schema: "public",
-          table: "bin_levels"
+          table: "bin_levels",
         },
         (payload) => {
           console.log(payload);
@@ -43,6 +43,7 @@ function BinLevelComponent() {
 
   return (
     <div>
+      {/* <BinLevelChart chartData={chartData} /> */}
       <BinLevelChart chartData={chartData} />
     </div>
   );

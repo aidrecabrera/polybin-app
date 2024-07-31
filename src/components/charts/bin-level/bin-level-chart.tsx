@@ -19,7 +19,7 @@ const binNames = {
   "Sensor 1": "Biodegradable",
   "Sensor 2": "Non-biodegradable",
   "Sensor 3": "Recyclable",
-  "Sensor 4": "Hazardous"
+  "Sensor 4": "Hazardous",
 };
 
 const binLevelChartConfig = {
@@ -50,16 +50,24 @@ interface ChartDataItem {
 }
 
 export function BinLevelChart({ chartData }: { chartData: ChartDataItem[] }) {
-  const processedChartData = chartData.map(item => {
-    const percentage = Math.round(((40 - item.level) / 30) * 100);
+  const processedChartData = chartData.map((item) => {
+    const level = parseFloat(item.level.toFixed(2));
+
+    // Adjust calculation: 10 is full (100%), 40 is empty (0%)
+    const percentage = Math.round(((40 - level) / (40 - 10)) * 100);
     const binName = binNames[item.sensor as keyof typeof binNames];
     return {
       bin: binName,
       percentage: Math.max(0, Math.min(100, percentage)),
       binPercentageLabel: `${binName}`,
-      // @ts-ignore
-      fill: binLevelChartConfig[binName as keyof typeof binLevelChartConfig].color,
+      fill: binLevelChartConfig[binName as keyof typeof binLevelChartConfig]
+        .color,
     };
+  });
+
+  console.log({
+    processedChartData,
+    chartData,
   });
 
   return (
@@ -82,7 +90,13 @@ export function BinLevelChart({ chartData }: { chartData: ChartDataItem[] }) {
           >
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel nameKey="bin" formatter={(value) => `Bin is ${value}% Full`} />}
+              content={
+                <ChartTooltipContent
+                  hideLabel
+                  nameKey="bin"
+                  formatter={(value) => `Bin is ${value}% Full`}
+                />
+              }
             />
             <RadialBar dataKey="percentage" background>
               <LabelList
